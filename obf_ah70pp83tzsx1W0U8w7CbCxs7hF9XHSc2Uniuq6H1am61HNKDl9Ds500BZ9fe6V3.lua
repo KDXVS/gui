@@ -1,4 +1,4 @@
--- This script will create a basic framework for a black-and-white themed GUI
+-- This script will create a basic framework for a black-and-white themed, movable GUI
 
 local GUI = {}
 
@@ -27,6 +27,31 @@ function GUI:CreateWindow(title)
     titleLabel.TextAlign = Enum.TextAlign.Center
     titleLabel.Parent = frame
 
+    -- Make the window draggable by clicking and holding the title label
+    local dragging = false
+    local dragInput, dragStart, startPos
+
+    titleLabel.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+        end
+    end)
+
+    titleLabel.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+
+    titleLabel.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+
     return window, frame
 end
 
@@ -52,6 +77,7 @@ function GUI:CreateTab(window, name)
 
     -- Toggle the visibility of content when tab is clicked
     tabButton.MouseButton1Click:Connect(function()
+        -- Toggle visibility of content frame
         contentFrame.Visible = not contentFrame.Visible
     end)
 
